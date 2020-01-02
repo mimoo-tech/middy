@@ -54,7 +54,13 @@ module.exports = ({ inputSchema, outputSchema, ajvOptions }) => {
       const valid = validateInput(handler.event)
 
       if (!valid) {
-        const error = new createError.BadRequest('Event object failed validation')
+        const error = new createError.BadRequest(
+          JSON.stringify({
+            code: "EVENT_OBJECT_FAILED_VALIDATION",
+            message: "Event object failed validation",
+            details: [...validateInput.errors]
+          })
+        );
         handler.event.headers = Object.assign({}, handler.event.headers)
         const language = chooseLanguage(handler.event, options.defaultLanguage)
         ajvLocalize[language](validateInput.errors)
@@ -73,7 +79,13 @@ module.exports = ({ inputSchema, outputSchema, ajvOptions }) => {
       const valid = validateOutput(handler.response)
 
       if (!valid) {
-        const error = new createError.InternalServerError('Response object failed validation')
+        const error = new createError.InternalServerError(
+          JSON.stringify({
+            code: "RESPONSE_OBJECT_FAILED_VALIDATION",
+            message: "Response object failed validation",
+            details: [...validateOutput.errors]
+          })
+        );
         error.details = validateOutput.errors
         error.response = handler.response
         throw error
